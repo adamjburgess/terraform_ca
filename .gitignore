@@ -1,0 +1,7 @@
+*/.terraform
+*/terraform.*
+*/*.tfvars
+*/.terraform.*
+*/*CA/*
+!ca/rootCA/rootCA
+!ca/intCA/intCA
