@@ -8,7 +8,7 @@ resource "tls_private_key" "root_ca_private_key" {
 
 resource "local_file" "root_ca_key" {
     content  = tls_private_key.root_ca_private_key.private_key_pem
-    filename = "${path.module}/rootCA/home-local-root.key"
+    filename = "${path.module}/rootCA/${replace(var.domain,".","-")}-root.key"
 }
 
 resource "tls_self_signed_cert" "root_ca_cert" {
@@ -17,12 +17,12 @@ resource "tls_self_signed_cert" "root_ca_cert" {
     is_ca_certificate = true
 
     subject {
-        country             = "AU"
-        province            = "ACT"
-        locality            = "Braddon"
-        common_name         = "home.local Root CA"
-        organization        = "Home Systems"
-        organizational_unit = "Home Systems Root Certificate Auhtority"
+        country             = var.country
+        province            = var.province
+        locality            = var.locality
+        common_name         = "${var.domain} - Root CA"
+        organization        = var.organization
+        organizational_unit = "${var.organization} Root Certificate Auhtority"
     }
 
     validity_period_hours = 43800 //  1825 days or 5 years
@@ -43,7 +43,7 @@ resource "tls_self_signed_cert" "root_ca_cert" {
 
 resource "local_file" "root_ca_cert" {
     content  = tls_self_signed_cert.root_ca_cert.cert_pem
-    filename = "${path.module}/rootCA/home-local-root.crt"
+    filename = "${path.module}/rootCA/${replace(var.domain,".","-")}-root.crt"
 }
 
 
@@ -54,32 +54,33 @@ resource "tls_private_key" "intermediate_ca_key" {
 
 resource "local_file" "intermediate_ca_key" {
     content  = tls_private_key.intermediate_ca_key.private_key_pem
-    filename = "${path.module}/intCA/home-local-int.key"
+    filename = "${path.module}/intCA//${replace(var.domain,".","-")}-int.key"
 }
 
 resource "tls_cert_request" "intermediate_csr" {
-    private_key_pem = file("${path.module}/intCA/home-local-int.key")
+    private_key_pem = tls_private_key.root_ca_private_key.private_key_pem
   
     subject {
-        country             = "AU"
-        province            = "ACT"
-        locality            = "Braddon"
-        common_name         = "home.local Intermediate CA"
-        organization        = "Home Systems"
-        organizational_unit = "Home Systems Intermediate Certificate Auhtority"
+        country             = var.country
+        province            = var.province
+        locality            = var.locality
+        common_name         = "${var.domain} - Intermediate CA"
+        organization        = var.organization
+        organizational_unit = "${var.organization} Intermediate Certificate Auhtority"
     }
+
+    depends_on = [ local_file.root_ca_key ]
 }
 
 resource "local_file" "intermediate_csr" {
     content  = tls_cert_request.intermediate_csr.cert_request_pem
-    filename = "${path.module}/intCA/home-local-int.csr"
+    filename = "${path.module}/intCA/${replace(var.domain,".","-")}-int.csr"
 }
 
 resource "tls_locally_signed_cert" "int_ca_cert" {
-
-    cert_request_pem   = file("${path.module}/intCA/home-local-int.csr")
-    ca_private_key_pem = file("${path.module}/rootCA/home-local-root.key")
-    ca_cert_pem        = file("${path.module}/rootCA/home-local-root.crt")
+    cert_request_pem   = tls_cert_request.intermediate_csr.cert_request_pem
+    ca_private_key_pem = tls_private_key.root_ca_private_key.private_key_pem
+    ca_cert_pem        = tls_self_signed_cert.root_ca_cert.cert_pem
 
     is_ca_certificate = true
 
@@ -101,5 +102,5 @@ resource "tls_locally_signed_cert" "int_ca_cert" {
 
 resource "local_file" "intermediate_cert" {
     content  = tls_locally_signed_cert.int_ca_cert.cert_pem
-    filename = "${path.module}/intCA/home-local-int.crt"
+    filename = "${path.module}/intCA/${replace(var.domain,".","-")}-int.crt"
 }

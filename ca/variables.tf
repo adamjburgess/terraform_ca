@@ -1,10 +1,19 @@
-
 variable "domain" {
 	type	= string
 }
 
-variable "domain_path" {
+variable "country" {
 	type	= string
 }
 
+variable "province" {
+	type	= string
+}
 
+variable "locality" {
+	type	= string
+}
+
+variable "organization" {
+	type	= string
+}
