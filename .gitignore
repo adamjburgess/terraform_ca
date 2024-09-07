@@ -5,3 +5,6 @@
 */*CA/*
 !ca/rootCA/rootCA
 !ca/intCA/intCA
+*/build.sh
+certs/certs/*
+!certs/certs/certs
