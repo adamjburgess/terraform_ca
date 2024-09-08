@@ -10,6 +10,7 @@ resource "local_file" "cert_priv_key" {
     for_each = var.certificates
     content  = tls_private_key.cert_priv_key[each.key].private_key_pem
     filename = "${path.module}/certs/${each.key}.key"
+    file_permission = "600"
 }
 #----------------------------#
 ## Create the Signing Request
@@ -34,6 +35,7 @@ resource "local_file" "cert_csr" {
     for_each = var.certificates
     content  = tls_cert_request.cert_csr[each.key].cert_request_pem
     filename = "${path.module}/certs/${each.key}.csr"
+    file_permission = "600"
 }
 
 #-------------------------#
@@ -54,4 +56,5 @@ resource "local_file" "cert" {
     for_each = var.certificates
     content  = tls_locally_signed_cert.cert[each.key].cert_pem
     filename = "${path.module}/certs/${each.key}.crt"
+    file_permission = "600"
 }

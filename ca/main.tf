@@ -9,6 +9,7 @@ resource "tls_private_key" "root_ca_private_key" {
 resource "local_file" "root_ca_key" {
     content  = tls_private_key.root_ca_private_key.private_key_pem
     filename = "${path.module}/rootCA/${replace(var.domain,".","-")}-root.key"
+    file_permission = "600"
 }
 
 resource "tls_self_signed_cert" "root_ca_cert" {
@@ -44,6 +45,7 @@ resource "tls_self_signed_cert" "root_ca_cert" {
 resource "local_file" "root_ca_cert" {
     content  = tls_self_signed_cert.root_ca_cert.cert_pem
     filename = "${path.module}/rootCA/${replace(var.domain,".","-")}-root.crt"
+    file_permission = "600"
 }
 
 
@@ -55,6 +57,7 @@ resource "tls_private_key" "intermediate_ca_key" {
 resource "local_file" "intermediate_ca_key" {
     content  = tls_private_key.intermediate_ca_key.private_key_pem
     filename = "${path.module}/intCA//${replace(var.domain,".","-")}-int.key"
+    file_permission = "600"
 }
 
 resource "tls_cert_request" "intermediate_csr" {
@@ -75,6 +78,7 @@ resource "tls_cert_request" "intermediate_csr" {
 resource "local_file" "intermediate_csr" {
     content  = tls_cert_request.intermediate_csr.cert_request_pem
     filename = "${path.module}/intCA/${replace(var.domain,".","-")}-int.csr"
+    file_permission = "600"
 }
 
 resource "tls_locally_signed_cert" "int_ca_cert" {
@@ -103,4 +107,5 @@ resource "tls_locally_signed_cert" "int_ca_cert" {
 resource "local_file" "intermediate_cert" {
     content  = tls_locally_signed_cert.int_ca_cert.cert_pem
     filename = "${path.module}/intCA/${replace(var.domain,".","-")}-int.crt"
+    file_permission = "600"
 }
